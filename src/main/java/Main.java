@@ -5,13 +5,18 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.Scanner;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 /**
  * Main class for client
  * @author Konanykhina Antonina
  */
 public class Main {
+    private static String host;
+
     public static void main(String[] args) {
+        System.out.println(args[1]);
+
 
         try {
             System.out.println(InetAddress.getLocalHost());
@@ -20,7 +25,7 @@ public class Main {
         }
         Scanner scanner;
         try {
-            System.setOut(new PrintStream(System.out, true, "windows-1251"));
+            System.setOut(new PrintStream(System.out, true, "UTF-8"));
             scanner = new Scanner(System.in);
         } catch (UnsupportedEncodingException e) {
             ConsoleManager.printErr("Code error");
@@ -28,12 +33,12 @@ public class Main {
         }
 
         int recconectAtmpts = 20;
-        int timeout = 10;
-        String host = "192.168.0.102";
-        int port = 1821;
+        int timeout = 10000;
+
+        int port;
         try {
-//            host = args[0].trim();
-//            port = Integer.parseInt(args[1].trim());
+            host = args[0].trim();
+            port = Integer.parseInt(args[1].trim());
             ConsoleManager.print("Получены хост: " + host + " и порт: " + port);
         }catch (NumberFormatException exception){
             ConsoleManager.printErr("Порт должен быть числом");

@@ -78,7 +78,6 @@ public class Client {
             serverWriter.writeObject(msg);
 
         } catch (IOException exception) {
-            exception.printStackTrace();
             ConsoleManager.printErr("Разрыв соеденения");
             throw new ConnectionBrokenException();
         }
@@ -141,7 +140,7 @@ public class Client {
             consoleManager.waitCommand();
             StudyGroup studyGroup = null;
             if (consoleManager.getCommand().equals("add") | consoleManager.getCommand().equals("update")
-            | consoleManager.getCommand().equals("add_if_max")){
+            | consoleManager.getCommand().equals("add_if_min")){
                 GroupBuilder groupBuilder = new GroupBuilder(new Scanner(System.in));
                 groupBuilder.setFields();
                 studyGroup = groupBuilder.studyGropCreator();

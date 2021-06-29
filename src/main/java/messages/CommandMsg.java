@@ -10,6 +10,14 @@ public class CommandMsg implements Serializable {
     private String commandStringArgument;
     private Serializable commandObjectArgument;
 
+    public void setCommandObjectArgument(Serializable commandObjectArgument) {
+        this.commandObjectArgument = commandObjectArgument;
+    }
+
+    public void setCommandStringArgument(String commandStringArgument) {
+        this.commandStringArgument = commandStringArgument;
+    }
+
     public CommandMsg(String commandNm, String commandSA, Serializable commandOA) {
         commandName = commandNm;
         commandStringArgument = commandSA;

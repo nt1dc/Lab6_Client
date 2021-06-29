@@ -9,7 +9,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     public int studentsCount; //Значение поля должно быть больше 0
     public FormOfEducation formOfEducation; //Поле не может быть null
     public Semester semesterEnum; //Поле может быть null
-    public Person groupAdmin; //Поле не может быть null
+    public  Person groupAdmin; //Поле не может быть null
 
     public StudyGroup() {
     }
