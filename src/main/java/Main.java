@@ -9,7 +9,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 /**
  * Main class for client
- * @author Konanykhina Antonina
  */
 public class Main {
     private static String host;
