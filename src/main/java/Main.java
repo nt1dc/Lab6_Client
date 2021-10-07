@@ -1,9 +1,11 @@
+import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
+import java.nio.channels.SelectionKey;
 import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -14,7 +16,9 @@ import org.apache.logging.log4j.Logger;
 public class Main {
     private static String host;
 
-    public static void main(String[] args) {
+
+
+    public static void main(String[] args) throws IOException, ClassNotFoundException {
         System.out.println(args[1]);
 
 
