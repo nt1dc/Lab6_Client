@@ -1,15 +1,19 @@
 
 
+import com.google.common.hash.Hashing;
 import exeptions.ConnectionBrokenException;
 import messages.AnswerMsg;
 import messages.CommandMsg;
 import messages.Status;
+import messages.User;
+import org.junit.Test;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 
@@ -21,18 +25,17 @@ public class Client {
     private int serverPort;
     private int connectionAttempts;
     private int connectionTimeout;
-
+    private boolean authenticated = false;
     public int attempts = 0;
-
     private ObjectOutputStream serverWriter;
-
     private ObjectInputStream serverReader;
-
     private SocketChannel socket;
-
     private ConsoleManager consoleManager;
-    ByteBuffer buffer = ByteBuffer.allocate(102400);
+    private ByteBuffer buffer = ByteBuffer.allocate(102400);
+    private User user =new User();
+    private AnswerMsg answ;
 
+    public Client(){}
 
     public Client(String host, int port, int attempts, int timeout, ConsoleManager cons) {
         serverHost = host;
@@ -70,6 +73,62 @@ public class Client {
         return true;
     }
 
+    public void registration() throws ConnectionBrokenException, IOException, ClassNotFoundException {
+        System.out.println("Starting Registration");
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter ur username");
+        user.setUserName(scanner.nextLine());
+        System.out.println("Enter ur password");
+        user.setPassword(Hashing.sha256().hashString(scanner.nextLine(), StandardCharsets.UTF_8).toString());
+        System.out.println(user.getUserName().equals("dima"));
+        writeMessage(new CommandMsg("registration",null,null,user));
+        readMessage();
+        if (answ.getStatus().equals(Status.ERROR)) {
+            registration();
+        } else {
+            System.out.println("Регистрация прошла успешно");
+            authentication();
+        }
+    }
+
+    private void authentication() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter ur username");
+        String line = scanner.nextLine();
+        user.setUserName(line);
+        System.out.println("Enter ur password");
+        user.setPassword(Hashing.sha256().hashString(scanner.nextLine(), StandardCharsets.UTF_8).toString());
+        try {
+            writeMessage(new CommandMsg("authentication", "", null, user));
+            readMessage();
+        } catch (ConnectionBrokenException | IOException | ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+        try {
+            if (answ.getMessage().equals("Хорошая работа ОЛЕГ")) {
+                authenticated = true;
+                System.out.println("Authentication complete");
+            } else {
+                System.out.println("Wrong login or password");
+                System.out.println("Введите \"Я обещаю зачесть данную лабу Антонову Дмитрию\", чтобы пройти регистрацию");
+                if (scanner.nextLine().equals("Я обещаю зачесть данную лабу Антонову Дмитрию")) {
+                    registration();
+                } else {
+                    System.out.println("Ну тогда пробуй еще раз");
+                    authentication();
+                }
+            }
+        } catch (ConnectionBrokenException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
     /**
      * Method write message to server in CommandMsg format
      *
@@ -104,15 +163,14 @@ public class Client {
         try {
             System.out.println("жду ответа");
             int num = socket.read(readBuffer);
-            System.out.println("Num is " + num);
             if (num > 0) {
                 System.out.println("Начинаю чтение объекта");
                 // Processing incoming data...
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(readBuffer.array());//массив байтов
                 ObjectInputStream objectInputStream = new ObjectInputStream(inputStream);
-                AnswerMsg answerMsg = (AnswerMsg) objectInputStream.readObject();//считываем объект
+                answ = (AnswerMsg) objectInputStream.readObject();//считываем объект
                 System.out.println("Объект получен");
-                System.out.println(answerMsg.getMessage());
+                System.out.println(answ.getMessage());
                 readBuffer.clear();
             }
         } catch (IOException exception) {
@@ -161,8 +219,11 @@ public class Client {
         }
         StudyGroup studyGroup = null;
         //print("Подключился, работаю");
+
         while (work) {
-            //print("Жду команду");
+            while (!authenticated) {
+                authentication();
+            }
             consoleManager.waitCommand();
 
             if (consoleManager.getCommand().equals("add") | consoleManager.getCommand().equals("update")
@@ -171,10 +232,8 @@ public class Client {
                 groupBuilder.setFields();
                 studyGroup = groupBuilder.studyGropCreator();
             }
-//            CommandMsg send = new CommandMsg(consoleManager.getCommand(), consoleManager.getArg(),new StudyGroup("1",1,1,1,FormOfEducation.EVENING_CLASSES,Semester.THIRD,"das",new Date(11),1,Long.parseLong("1"),"1"));
+            CommandMsg send = new CommandMsg(consoleManager.getCommand(), consoleManager.getArg(), studyGroup, user);
 
-            CommandMsg send = new CommandMsg(consoleManager.getCommand(), consoleManager.getArg(), studyGroup);
-            AnswerMsg answ = null;
             boolean wasSend = false;
             try {
                 writeMessage(send);

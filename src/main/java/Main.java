@@ -9,6 +9,8 @@ import java.nio.channels.SelectionKey;
 import java.util.Scanner;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.Test;
+
 /**
  * Main class for client
  * @author Konanykhina Antonina
@@ -20,8 +22,6 @@ public class Main {
 
     public static void main(String[] args) throws IOException, ClassNotFoundException {
         System.out.println(args[1]);
-
-
         try {
             System.out.println(InetAddress.getLocalHost());
         } catch (UnknownHostException e) {

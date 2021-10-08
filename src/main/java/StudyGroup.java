@@ -5,18 +5,40 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
     public Long id; //Поле не может быть null, Значение поля должно быть больше 0, Значение этого поля должно быть уникальным, Значение этого поля должно генерироваться автоматически
     public String name; //Поле не может быть null, Строка не может быть пустой
     public Coordinates coordinates; //Поле не может быть null
-    public Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
+    public java.util.Date creationDate; //Поле не может быть null, Значение этого поля должно генерироваться автоматически
     public int studentsCount; //Значение поля должно быть больше 0
     public FormOfEducation formOfEducation; //Поле не может быть null
     public Semester semesterEnum; //Поле может быть null
-    public  Person groupAdmin; //Поле не может быть null
+    public Person groupAdmin; //Поле не может быть null
 
     public StudyGroup() {
     }
+    public StudyGroup(String name, int x, double y,Date creationDate, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
+//        Date timeForID = new Date();
+        this.id = Math.abs(UUID.randomUUID().getLeastSignificantBits());
+        this.name = name;
+        this.coordinates = new Coordinates(x, y);
+        this.creationDate = creationDate;
+        this.studentsCount = studentsCount;
+        this.formOfEducation = formOfEducation;
+        this.semesterEnum = semesterEnum;
+        this.groupAdmin = new Person(adminName, birthday, height, weight, passportID);
+    }
 
     public StudyGroup(String name, int x, double y, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
-        Date timeForID = new Date();
+//        Date timeForID = new Date();
         this.id = Math.abs(UUID.randomUUID().getLeastSignificantBits());
+        this.name = name;
+        this.coordinates = new Coordinates(x, y);
+        this.creationDate = new Date();
+        this.studentsCount = studentsCount;
+        this.formOfEducation = formOfEducation;
+        this.semesterEnum = semesterEnum;
+        this.groupAdmin = new Person(adminName, birthday, height, weight, passportID);
+    }
+    public StudyGroup(Long id,String name, int x, double y, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
+//        Date timeForID = new Date();
+        this.id =id;
         this.name = name;
         this.coordinates = new Coordinates(x, y);
         this.creationDate = new Date();
@@ -178,7 +200,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
 
 }
 
-class Coordinates implements Serializable {
+class Coordinates implements Serializable{
     private int x;
     private Double y; //Максимальное значение поля: 110, Поле не может быть null
 
@@ -237,7 +259,7 @@ class Coordinates implements Serializable {
 
 class Person implements Serializable {
     private String name; //Поле не может быть null, Строка не может быть пустой
-    private Date birthday; //Поле не может быть null
+    private java.util.Date birthday; //Поле не может быть null
     private long height; //Значение поля должно быть больше 0
     private Long weight; //Поле не может быть null, Значение поля должно быть больше 0
     private String passportID; //Поле не может быть null
@@ -379,7 +401,7 @@ class Person implements Serializable {
 
 }
 
-enum Semester implements  Serializable{
+enum Semester implements Serializable{
     THIRD,
     FIFTH,
     SIXTH

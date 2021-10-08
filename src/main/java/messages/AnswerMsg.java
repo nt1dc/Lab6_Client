@@ -59,6 +59,7 @@ public class AnswerMsg implements Serializable {
         return status;
     }
 
-
-
+    public void setMsg(String msg) {
+        Msg = msg;
+    }
 }
