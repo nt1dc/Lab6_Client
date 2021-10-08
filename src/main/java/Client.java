@@ -32,10 +32,11 @@ public class Client {
     private SocketChannel socket;
     private ConsoleManager consoleManager;
     private ByteBuffer buffer = ByteBuffer.allocate(102400);
-    private User user =new User();
+    private User user = new User();
     private AnswerMsg answ;
 
-    public Client(){}
+    public Client() {
+    }
 
     public Client(String host, int port, int attempts, int timeout, ConsoleManager cons) {
         serverHost = host;
@@ -80,8 +81,7 @@ public class Client {
         user.setUserName(scanner.nextLine());
         System.out.println("Enter ur password");
         user.setPassword(Hashing.sha256().hashString(scanner.nextLine(), StandardCharsets.UTF_8).toString());
-        System.out.println(user.getUserName().equals("dima"));
-        writeMessage(new CommandMsg("registration",null,null,user));
+        writeMessage(new CommandMsg("registration", null, null, user));
         readMessage();
         if (answ.getStatus().equals(Status.ERROR)) {
             registration();
@@ -91,19 +91,17 @@ public class Client {
         }
     }
 
-    private void authentication() {
+    private void authentication() throws ConnectionBrokenException, IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter ur username");
         String line = scanner.nextLine();
         user.setUserName(line);
         System.out.println("Enter ur password");
         user.setPassword(Hashing.sha256().hashString(scanner.nextLine(), StandardCharsets.UTF_8).toString());
-        try {
-            writeMessage(new CommandMsg("authentication", "", null, user));
-            readMessage();
-        } catch (ConnectionBrokenException | IOException | ClassNotFoundException e) {
-            e.printStackTrace();
-        }
+
+        writeMessage(new CommandMsg("authentication", "", null, user));
+        readMessage();
+
         try {
             if (answ.getMessage().equals("Хорошая работа ОЛЕГ")) {
                 authenticated = true;
@@ -157,8 +155,8 @@ public class Client {
      * @return Message
      * @throws ConnectionBrokenException If connection was broken
      */
-    private AnswerMsg readMessage() throws ConnectionBrokenException, IOException, ClassNotFoundException {
-        AnswerMsg retMsg = null;
+    private AnswerMsg readMessage() throws ConnectionBrokenException, IOException {
+        AnswerMsg retMsg = new AnswerMsg();
         ByteBuffer readBuffer = ByteBuffer.allocate(102400);
         try {
             System.out.println("жду ответа");
@@ -174,9 +172,8 @@ public class Client {
                 readBuffer.clear();
             }
         } catch (IOException exception) {
-            exception.printStackTrace();
             ConsoleManager.printErr("Разрыв соеденения");
-//            throw new ConnectionBrokenException();
+            throw new ConnectionBrokenException();
         } catch (ClassNotFoundException exception) {
             ConsoleManager.printErr("Пришедшие данные не класс");
         }
@@ -200,8 +197,8 @@ public class Client {
     /**
      * Main function witch get command and send.
      */
-    public void run() throws IOException, ClassNotFoundException {
-
+    public void run() throws IOException, ClassNotFoundException, ConnectionBrokenException {
+        boolean wasSend = false;
         boolean work = true;
         System.out.println("Подключаюсь к серверу");
         while (!connectToServer()) {
@@ -221,11 +218,32 @@ public class Client {
         //print("Подключился, работаю");
 
         while (work) {
-            while (!authenticated) {
-                authentication();
+            try {
+
+
+                while (!authenticated) {
+                    authentication();
+                }
+            } catch (ConnectionBrokenException e) {
+                System.out.println("Попытка переподключиться");
+                while (!connectToServer()) {
+                    if (attempts > connectionAttempts) {
+                        ConsoleManager.printErr("Превышено количество попыток подключиться");
+                        return;
+                    }
+                    try {
+                        Thread.sleep(connectionTimeout);
+                    } catch (InterruptedException exception) {
+                        ConsoleManager.printErr("Произошла ошибка при попытке ожидания подключения");
+                    }
+                }
+
             }
             consoleManager.waitCommand();
-
+            if (consoleManager.getCommand().equals("exit")){
+                socket.close();
+                System.exit(0);
+            }
             if (consoleManager.getCommand().equals("add") | consoleManager.getCommand().equals("update")
                     | consoleManager.getCommand().equals("add_if_min")) {
                 GroupBuilder groupBuilder = new GroupBuilder(new Scanner(System.in));
@@ -233,15 +251,13 @@ public class Client {
                 studyGroup = groupBuilder.studyGropCreator();
             }
             CommandMsg send = new CommandMsg(consoleManager.getCommand(), consoleManager.getArg(), studyGroup, user);
-
-            boolean wasSend = false;
             try {
+
                 writeMessage(send);
                 wasSend = true;
                 System.out.println("я чё-то отправил");
                 answ = readMessage();
-            } catch (ConnectionBrokenException e) {
-                e.printStackTrace();
+            } catch (ConnectionBrokenException exception1) {
                 System.out.println("Попытка переподключиться");
                 while (!connectToServer()) {
                     if (attempts > connectionAttempts) {
@@ -273,7 +289,9 @@ public class Client {
                 }
             }
         }
-        closeConnection();
-    }
 
+
+        closeConnection();
+
+    }
 }

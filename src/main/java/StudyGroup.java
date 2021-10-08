@@ -13,9 +13,9 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
 
     public StudyGroup() {
     }
-    public StudyGroup(String name, int x, double y,Date creationDate, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
+    public StudyGroup(Long id,String name, int x, double y,Date creationDate, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
 //        Date timeForID = new Date();
-        this.id = Math.abs(UUID.randomUUID().getLeastSignificantBits());
+        this.id=id;
         this.name = name;
         this.coordinates = new Coordinates(x, y);
         this.creationDate = creationDate;
@@ -27,7 +27,7 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
 
     public StudyGroup(String name, int x, double y, int studentsCount, FormOfEducation formOfEducation, Semester semesterEnum, String adminName, Date birthday, long height, Long weight, String passportID) {
 //        Date timeForID = new Date();
-        this.id = Math.abs(UUID.randomUUID().getLeastSignificantBits());
+
         this.name = name;
         this.coordinates = new Coordinates(x, y);
         this.creationDate = new Date();

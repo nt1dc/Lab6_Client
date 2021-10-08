@@ -7,6 +7,8 @@ import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.nio.channels.SelectionKey;
 import java.util.Scanner;
+
+import exeptions.ConnectionBrokenException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.junit.Test;
@@ -20,7 +22,7 @@ public class Main {
 
 
 
-    public static void main(String[] args) throws IOException, ClassNotFoundException {
+    public static void main(String[] args) throws IOException, ClassNotFoundException, ConnectionBrokenException {
         System.out.println(args[1]);
         try {
             System.out.println(InetAddress.getLocalHost());
